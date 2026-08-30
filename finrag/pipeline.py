@@ -26,6 +26,7 @@ from .config import DATASET_CONFIGS, DATASET_DIR, DatasetConfig
 from .data import load_jsonl, load_qrels, make_corpus_lookup
 from .evaluation import compute_ndcg
 from .generation import GenerationResult, generate_answer
+from .guardrails import validate_query
 from .models import (
     GROQ_DEFAULT_MODEL,
     OLLAMA_DEFAULT_MODEL,
@@ -259,6 +260,7 @@ def run_rag_query(
             f"Valid options: {list(DATASET_CONFIGS)}"
         )
 
+    validate_query(query)
     cfg = DATASET_CONFIGS[dataset_name]
 
     # ── Load corpus + build lookup ─────────────────────────────────────────
