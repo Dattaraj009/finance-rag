@@ -26,6 +26,18 @@ class DatasetConfig:
 
 
 DATASET_CONFIGS: dict[str, DatasetConfig] = {
+    # ── Demo / project-level quick-start ─────────────────────────────────────
+    "demo_finance": DatasetConfig(
+        name="demo_finance",
+        corpus_file="demo_finance/corpus.jsonl",
+        query_file="demo_finance/queries.jsonl",
+        qrels_file="demo_finance/qrels.tsv",
+        chunk_size=256,
+        chunk_overlap=32,
+        dataset_type="passage",
+        fetch_k=20,
+        rerank_top_n=10,
+    ),
     # ── Passage retrieval ────────────────────────────────────────────────────
     "financebench": DatasetConfig(
         name="financebench",
