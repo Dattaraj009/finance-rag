@@ -69,7 +69,7 @@ def split_documents(
             )
 
     logger.info(
-        "Chunked %d docs → %d chunks (size=%d, overlap=%d, type=%s)",
+        "Chunked %d docs into %d chunks (size=%d, overlap=%d, type=%s)",
         len(corpus),
         len(texts),
         chunk_size,

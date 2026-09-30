@@ -190,7 +190,7 @@ def run_ragas_eval(
     Parameters
     ----------
     queries        : full query list (dicts with _id + text)
-    retrieved_map  : query_id → [(corpus_id, score)]  from retrieve_and_rerank
+    retrieved_map  : query_id → [(corpus_id, score)]  from retrieve_hybrid
     answers_map    : query_id → answer string          from generate_answer
     corpus_lookup  : {corpus_id: doc}                  from make_corpus_lookup
     llm            : ChatGroq instance (judge LLM — rate-limited)

@@ -68,7 +68,7 @@ class CitedSource:
     """A single retrieved document used in the answer."""
     corpus_id:  str
     title:      str
-    score:      float          # reranker score
+    score:      float          # RRF score
     excerpt:    str            # first 400 chars of doc text
 
 
@@ -169,7 +169,7 @@ def generate_answer(
     Parameters
     ----------
     query          : the user's original question
-    retrieved      : [(corpus_id, reranker_score), …] from retrieve_and_rerank
+    retrieved      : [(corpus_id, RRF score), …] from retrieve_hybrid
     corpus_lookup  : {corpus_id: doc_dict} — built by make_corpus_lookup()
     llm            : ChatGroq instance from models.get_llm()
     top_k          : how many retrieved docs to include in context (default 5)

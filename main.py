@@ -68,7 +68,7 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=10,
         metavar="K",
-        help="Documents to retrieve per query (default: 10; RAG mode default: 5).",
+        help="Documents to retrieve per query from the fused results (default: 10).",
     )
     parser.add_argument(
         "--rebuild",
@@ -142,8 +142,6 @@ def main() -> None:
 
         from finrag.pipeline import run_rag_query
 
-        top_k = args.top_k if args.top_k != 10 else 5   # sensible default for RAG
-
         print(f"\nDataset  : {args.dataset}")
         print(f"Provider : {args.provider}" + (f"  model={args.model}" if args.model else ""))
         print(f"Query    : {args.query}\n")
@@ -152,7 +150,7 @@ def main() -> None:
             result = run_rag_query(
                 query=args.query,
                 dataset_name=args.dataset,
-                top_k=top_k,
+                top_k=args.top_k,
                 use_multiquery=use_multiquery,
                 force_rebuild=args.rebuild,
                 provider=args.provider,

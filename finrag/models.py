@@ -1,5 +1,5 @@
 """
-Model singletons — embedding model, cross-encoder reranker, and LLM.
+Model singletons — embedding model and LLM.
 
 All models are loaded lazily on first access and cached for reuse across
 datasets. Device detection prioritises: CUDA → MPS (Apple Silicon) → CPU.
@@ -52,7 +52,6 @@ def empty_cache() -> None:
 
 # ── Lazy singletons ───────────────────────────────────────────────────────────
 _embedding_model = None
-_reranker        = None
 _llm             = None   # Groq singleton only
 
 
@@ -74,26 +73,6 @@ def get_embedding_model():
         )
         logger.info("Embedding model ready.")
     return _embedding_model
-
-
-def get_reranker():
-    """
-    Load BAAI/bge-reranker-v2-m3 cross-encoder (2.27 GB).
-    Cached after first call.
-    """
-    global _reranker
-    if _reranker is None:
-        from sentence_transformers import CrossEncoder
-
-        device = get_device()
-        logger.info("Loading reranker on device=%s …", device)
-        _reranker = CrossEncoder(
-            "BAAI/bge-reranker-v2-m3",
-            device=device,
-            max_length=512,
-        )
-        logger.info("Reranker ready.")
-    return _reranker
 
 
 # ── Groq (cloud) ──────────────────────────────────────────────────────────────

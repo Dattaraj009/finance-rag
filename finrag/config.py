@@ -21,8 +21,6 @@ class DatasetConfig:
     chunk_size: int
     chunk_overlap: int
     dataset_type: str         # "passage" | "tabular"
-    fetch_k: int              # candidates fetched before reranking
-    rerank_top_n: int         # candidates passed to cross-encoder
 
 
 DATASET_CONFIGS: dict[str, DatasetConfig] = {
@@ -35,8 +33,6 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         chunk_size=256,
         chunk_overlap=32,
         dataset_type="passage",
-        fetch_k=20,
-        rerank_top_n=10,
     ),
     # ── Passage retrieval ────────────────────────────────────────────────────
     "financebench": DatasetConfig(
@@ -47,8 +43,6 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         chunk_size=512,
         chunk_overlap=64,
         dataset_type="passage",
-        fetch_k=75,
-        rerank_top_n=30,
     ),
     "finder": DatasetConfig(
         name="finder",
@@ -58,8 +52,6 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         chunk_size=512,
         chunk_overlap=64,
         dataset_type="passage",
-        fetch_k=75,
-        rerank_top_n=30,
     ),
     "finqabench": DatasetConfig(
         name="finqabench",
@@ -69,8 +61,6 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         chunk_size=1024,
         chunk_overlap=128,
         dataset_type="passage",
-        fetch_k=75,
-        rerank_top_n=30,
     ),
     # ── Tabular + text ───────────────────────────────────────────────────────
     "finqa": DatasetConfig(
@@ -81,8 +71,6 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         chunk_size=1024,
         chunk_overlap=128,
         dataset_type="tabular",
-        fetch_k=40,
-        rerank_top_n=20,
     ),
     "tatqa": DatasetConfig(
         name="tatqa",
@@ -92,8 +80,6 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         chunk_size=1024,
         chunk_overlap=128,
         dataset_type="tabular",
-        fetch_k=50,
-        rerank_top_n=25,
     ),
     "convfinqa": DatasetConfig(
         name="convfinqa",
@@ -103,8 +89,6 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         chunk_size=1024,
         chunk_overlap=128,
         dataset_type="tabular",
-        fetch_k=50,
-        rerank_top_n=25,
     ),
     "multiheirtt": DatasetConfig(
         name="multiheirtt",
@@ -114,7 +98,5 @@ DATASET_CONFIGS: dict[str, DatasetConfig] = {
         chunk_size=1024,
         chunk_overlap=128,
         dataset_type="tabular",
-        fetch_k=40,
-        rerank_top_n=20,
     ),
 }

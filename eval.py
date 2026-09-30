@@ -165,9 +165,8 @@ def main() -> None:
         get_embedding_model,
         get_provider_eval_llm,
         get_provider_llm,
-        get_reranker,
     )
-    from finrag.retrieval import build_bm25_okapi, build_bm25_retriever, retrieve_and_rerank
+    from finrag.retrieval import build_bm25_retriever, retrieve_hybrid
     from finrag.vectorstore import get_vectorstore
     from finrag.generation import generate_answer
 
@@ -192,7 +191,6 @@ def main() -> None:
     # ── Build pipeline components ──────────────────────────────────────────
     chunks          = split_documents(corpus, cfg.chunk_size, cfg.chunk_overlap, cfg.dataset_type)
     embedding_model = get_embedding_model()
-    reranker        = get_reranker()
 
     gen_llm = get_provider_llm(args.provider, args.model)
     if gen_llm is None:
@@ -221,8 +219,7 @@ def main() -> None:
 
     vectorstore    = get_vectorstore(cfg.name, chunks, embedding_model,
                                      force_rebuild=args.rebuild)
-    bm25_retriever = build_bm25_retriever(chunks.lc_docs, fetch_k=cfg.fetch_k)
-    bm25_okapi     = build_bm25_okapi(chunks.texts)
+    bm25_retriever = build_bm25_retriever(chunks.lc_docs)
 
     # ── Sample queries ─────────────────────────────────────────────────────
     import random
@@ -245,18 +242,13 @@ def main() -> None:
     for q in tqdm(sample, desc="  retrieve+gen", unit="query"):
         qid = q["_id"]
         try:
-            ranked = retrieve_and_rerank(
+            ranked = retrieve_hybrid(
                 vectorstore=vectorstore,
                 bm25_retriever=bm25_retriever,
-                bm25_okapi=bm25_okapi,
-                chunk_result=chunks,
                 query=q["text"],
-                reranker=reranker,
                 dataset_type=cfg.dataset_type,
-                fetch_k=cfg.fetch_k,
                 llm=retrieval_llm,
                 k=args.top_k,
-                rerank_top_n=cfg.rerank_top_n,
             )
             retrieved_map[qid] = ranked
 

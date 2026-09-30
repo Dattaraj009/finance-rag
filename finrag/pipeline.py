@@ -33,9 +33,8 @@ from .models import (
     empty_cache,
     get_embedding_model,
     get_provider_llm,
-    get_reranker,
 )
-from .retrieval import build_bm25_okapi, build_bm25_retriever, retrieve_and_rerank
+from .retrieval import build_bm25_retriever, retrieve_hybrid
 from .vectorstore import get_vectorstore
 
 load_dotenv()
@@ -109,7 +108,6 @@ def run_dataset(
 
     # ── Models (lazy singletons — loaded once, shared across datasets) ─────
     embedding_model = get_embedding_model()
-    reranker        = get_reranker()
     llm             = get_provider_llm(provider, model) if use_multiquery else None
 
     # ── Vector store ───────────────────────────────────────────────────────
@@ -122,13 +120,12 @@ def run_dataset(
 
     # ── BM25 (built once per dataset) ─────────────────────────────────────
     logger.info("Building BM25 indexes …")
-    bm25_retriever = build_bm25_retriever(chunks.lc_docs, fetch_k=cfg.fetch_k)
-    bm25_okapi     = build_bm25_okapi(chunks.texts)
+    bm25_retriever = build_bm25_retriever(chunks.lc_docs)
 
     # ── Per-query retrieval ────────────────────────────────────────────────
     logger.info(
-        "Retrieving %d queries  (fetch_k=%d, rerank_top_n=%d) …",
-        len(queries), cfg.fetch_k, cfg.rerank_top_n,
+        "Retrieving %d queries  (top 10 per retriever) …",
+        len(queries),
     )
 
     dataset_results: dict[str, dict[str, float]] = {}
@@ -136,18 +133,13 @@ def run_dataset(
 
     for q in tqdm(queries, desc=f"  {cfg.name}", unit="query", leave=True):
         try:
-            ranked = retrieve_and_rerank(
+            ranked = retrieve_hybrid(
                 vectorstore=vectorstore,
                 bm25_retriever=bm25_retriever,
-                bm25_okapi=bm25_okapi,
-                chunk_result=chunks,
                 query=q["text"],
-                reranker=reranker,
                 dataset_type=cfg.dataset_type,
-                fetch_k=cfg.fetch_k,
                 llm=llm,
                 k=top_k,
-                rerank_top_n=cfg.rerank_top_n,
             )
             dataset_results[q["_id"]] = {doc_id: float(s) for doc_id, s in ranked}
         except Exception as exc:
@@ -222,7 +214,7 @@ def run_rag_query(
     query:          str,
     dataset_name:   str  = "financebench",
     *,
-    top_k:          int  = 5,
+    top_k:          int  = 10,
     use_multiquery: bool = True,
     force_rebuild:  bool = False,
     provider:       str  = "groq",
@@ -238,7 +230,7 @@ def run_rag_query(
     ----------
     query          : natural language financial question
     dataset_name   : which corpus to search (default: "financebench")
-    top_k          : docs to retrieve and pass to the LLM (default: 5)
+    top_k          : docs to retrieve and pass to the LLM (default: 10)
     use_multiquery : use LLM query expansion (requires LLM to be available)
     force_rebuild  : rebuild ChromaDB index even if cache exists
     provider       : "groq" (cloud) or "ollama" (local)
@@ -270,7 +262,6 @@ def run_rag_query(
     # ── Chunk + models (cached after first call) ───────────────────────────
     chunks          = split_documents(corpus, cfg.chunk_size, cfg.chunk_overlap, cfg.dataset_type)
     embedding_model = get_embedding_model()
-    reranker        = get_reranker()
     gen_llm         = get_provider_llm(provider, model)
 
     if gen_llm is None:
@@ -284,22 +275,16 @@ def run_rag_query(
 
     # ── Vector store + BM25 (vector store cached on disk) ─────────────────
     vectorstore    = get_vectorstore(cfg.name, chunks, embedding_model, force_rebuild=force_rebuild)
-    bm25_retriever = build_bm25_retriever(chunks.lc_docs, fetch_k=cfg.fetch_k)
-    bm25_okapi     = build_bm25_okapi(chunks.texts)
+    bm25_retriever = build_bm25_retriever(chunks.lc_docs)
 
     # ── Retrieve ───────────────────────────────────────────────────────────
-    retrieved = retrieve_and_rerank(
+    retrieved = retrieve_hybrid(
         vectorstore=vectorstore,
         bm25_retriever=bm25_retriever,
-        bm25_okapi=bm25_okapi,
-        chunk_result=chunks,
         query=query,
-        reranker=reranker,
         dataset_type=cfg.dataset_type,
-        fetch_k=cfg.fetch_k,
         llm=retrieval_llm,
         k=top_k,
-        rerank_top_n=cfg.rerank_top_n,
     )
 
     # ── Generate ───────────────────────────────────────────────────────────
