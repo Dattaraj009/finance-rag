@@ -148,15 +148,20 @@ def main() -> None:
         print(f"Provider : {args.provider}" + (f"  model={args.model}" if args.model else ""))
         print(f"Query    : {args.query}\n")
 
-        result = run_rag_query(
-            query=args.query,
-            dataset_name=args.dataset,
-            top_k=top_k,
-            use_multiquery=use_multiquery,
-            force_rebuild=args.rebuild,
-            provider=args.provider,
-            model=args.model,
-        )
+        try:
+            result = run_rag_query(
+                query=args.query,
+                dataset_name=args.dataset,
+                top_k=top_k,
+                use_multiquery=use_multiquery,
+                force_rebuild=args.rebuild,
+                provider=args.provider,
+                model=args.model,
+            )
+        except ValueError as exc:
+            print(f"Guardrail violation: {exc}")
+            sys.exit(1)
+
         print(result.pretty())
         return
 

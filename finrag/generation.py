@@ -19,6 +19,8 @@ from dataclasses import dataclass
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
+from .guardrails import apply_guardrails, validate_query
+
 logger = logging.getLogger(__name__)
 
 # ── Prompt templates ──────────────────────────────────────────────────────────
@@ -178,6 +180,8 @@ def generate_answer(
     -------
     GenerationResult with answer text and cited sources.
     """
+    validate_query(query)
+
     if not retrieved:
         return GenerationResult(
             query=query,
@@ -228,9 +232,10 @@ def generate_answer(
             len(cited_sources), len(sources), len(result.answer),
         )
 
+        answer = apply_guardrails(result.answer, valid_ids=valid_ids)
         return GenerationResult(
             query=query,
-            answer=result.answer,
+            answer=answer,
             sources=cited_sources,
             model=model_name,
             multiquery=multiquery,
@@ -253,6 +258,7 @@ def generate_answer(
             if cited_set else sources
         )
 
+        answer = apply_guardrails(answer, valid_ids=valid_ids)
         return GenerationResult(
             query=query,
             answer=answer,

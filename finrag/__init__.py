@@ -10,5 +10,6 @@ models      Embedding model, reranker, and LLM (lazy singletons, MPS-aware).
 vectorstore ChromaDB build / load helpers.
 retrieval   BM25, EnsembleRetriever, retrieve-and-rerank.
 evaluation  NDCG@10 and coverage metrics.
+guardrails  Query and answer validation to keep outputs grounded and safe.
 pipeline    End-to-end orchestrator.
 """
